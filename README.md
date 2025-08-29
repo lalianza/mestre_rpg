@@ -1,6 +1,5 @@
 # Mestre de RPG (RPG Master)
 
-![Mestre de RPG Banner] (https://image.pollinations.ai/prompt/fantasy%20rpg%20game%20master%20with%20dice%20and%20storytelling%20elements?width=1200&height=600&seed=42)
 
 ## 🇧🇷 Português
 
