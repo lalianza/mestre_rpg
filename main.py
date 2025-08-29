@@ -4,14 +4,14 @@ from pydantic import BaseModel
 from typing import List, Dict
 
 # Importa as classes dos serviços
-from src.services.firestore_service import FirestoreService
+from src.services.local_db_service import LocalDbService
 from src.services.rag_service import LocalRAGService # << CORRIGIDO AQUI
 from src.services.vertex_service import VertexService
 
 app = FastAPI()
 
 # Inicializa os serviços
-firestore_service = FirestoreService()
+local_db_service = LocalDbService()
 rag_service = LocalRAGService() # << CORRIGIDO AQUI
 vertex_service = VertexService()
 
@@ -39,8 +39,8 @@ async def handle_game_turn(data: PlayerInput):
     Endpoint para processar uma ação do jogador e retornar a narrativa do Mestre de RPG.
     """
     try:
-        # 1. Recupera o estado do jogador do Firestore
-        player_data = firestore_service.get_player_data(data.player_id)
+
+        player_data = local_db_service.get_player_data(data.player_id)
         if not player_data:
             player_data = {
                 "name": f"Aventureiro_{data.player_id[:4]}",
@@ -48,7 +48,7 @@ async def handle_game_turn(data: PlayerInput):
                 "inventory": ["Espada Curta", "Poção de Cura"],
                 "location": "A entrada da Floresta dos Sussurros"
             }
-            firestore_service.save_player_data(data.player_id, player_data)
+            local_db_service.save_player_data(data.player_id, player_data)
 
         # 2. Busca informações relevantes na base de conhecimento (RAG)
         relevant_info = rag_service.search_relevant_text(data.message)
