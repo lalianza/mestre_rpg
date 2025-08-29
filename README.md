@@ -1,5 +1,5 @@
 # Mestre de RPG (RPG Master)
-
+![RPG Master Banner](https://image.pollinations.ai/prompt/fantasy%20rpg%20game%20master%20with%20dice%20and%20storytelling%20elements?width=1200&height=600&seed=42)
 
 ## 🇧🇷 Português
 
@@ -36,9 +36,7 @@ Siga estes passos para configurar e executar o projeto localmente.
 
 #### 1. Clonar o Repositório
 
-# RPG Master
-
-![RPG Master Banner](https://image.pollinations.ai/prompt/fantasy%20rpg%20game%20master%20with%20dice%20and%20storytelling%20elements?width=1200&height=600&seed=42)
+# RPG Narrator
 
 ## 🇬🇧 English
 
