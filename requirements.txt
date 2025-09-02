@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-google-cloud-aiplatform
-google-cloud-firestore
-sentence-transformers
-chromadb
-firebase-admin

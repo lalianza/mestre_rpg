@@ -1,82 +1,38 @@
 import os
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict
+import sys
+from dotenv import load_dotenv
 
-# Importa as classes dos serviços
-from src.services.local_db_service import LocalDbService
-from src.services.rag_service import LocalRAGService # << CORRIGIDO AQUI
-from src.services.vertex_service import VertexService
-
-app = FastAPI()
-
-# Inicializa os serviços
-local_db_service = LocalDbService()
-rag_service = LocalRAGService() # << CORRIGIDO AQUI
-vertex_service = VertexService()
-
-class PlayerInput(BaseModel):
-    player_id: str
-    message: str
-    history: List[Dict[str, str]] = []
+load_dotenv()
 
 
-@app.on_event("startup")
-async def startup_event():
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+
+from src.services.dm_assistant import dm_assistant_chat
+
+
+def run_local_chat():
     """
-    Evento que é executado na inicialização do servidor.
-    Popula a base de conhecimento do RAG.
+    Runs a local chat session to test the narrator's assistant.
     """
-    print("Inicializando e populando a base de conhecimento do RAG...")
-    try:
-        rag_service.load_knowledge_base()
-    except Exception as e:
-        print(f"Erro ao carregar a base de conhecimento: {e}")
+    print("--- Assistente do mestre ---")
+    print("Digite sua questão ou 'sair' para finalizar o chat.")
+    print("---------------------------------------")
 
-@app.post("/game-turn")
-async def handle_game_turn(data: PlayerInput):
-    """
-    Endpoint para processar uma ação do jogador e retornar a narrativa do Mestre de RPG.
-    """
-    try:
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() == 'sair':
+            print("Fechando a sessão, obrigado!")
+            break
 
-        player_data = local_db_service.get_player_data(data.player_id)
-        if not player_data:
-            player_data = {
-                "name": f"Aventureiro_{data.player_id[:4]}",
-                "hp": 100,
-                "inventory": ["Espada Curta", "Poção de Cura"],
-                "location": "A entrada da Floresta dos Sussurros"
-            }
-            local_db_service.save_player_data(data.player_id, player_data)
+        try:
+            response = dm_assistant_chat(user_input)
+            print(f"Assistant: {response}")
+        except Exception as e:
+            print(f"um erro ocorreu para a questão: {e}")
+            print("Por favor, tente novamente.")
 
-        # 2. Busca informações relevantes na base de conhecimento (RAG)
-        relevant_info = rag_service.search_relevant_text(data.message)
-
-        # 3. Constrói o prompt completo para o modelo de IA
-        prompt_parts = [
-            "Você é um Mestre de RPG em um cenário de fantasia medieval. Sua tarefa é narrar a história, simular a aleatoriedade de dados e interagir com o jogador de forma imersiva. Sua resposta deve ser criativa e envolvente.",
-            "Considere as seguintes informações do jogador:",
-            f"- Nome: {player_data['name']}",
-            f"- HP: {player_data['hp']}",
-            f"- Localização: {player_data['location']}",
-            f"- Inventário: {', '.join(player_data['inventory'])}",
-            "Use as seguintes informações do mundo para enriquecer sua narrativa:",
-            *[f" - {info['text']}" for info in relevant_info],
-            "Aqui está o histórico da conversa:",
-            *[f"{entry['role']}: {entry['content']}" for entry in data.history],
-            f"Ação do jogador: {data.message}",
-            "Sua resposta deve ser uma continuação da história, descrevendo as consequências da ação do jogador. Se a ação for um ataque, simule a jogada de um dado (ex: 'Você rolou um 18 e acertou o goblin!')."
-        ]
-
-        full_prompt = "\n\n".join(prompt_parts)
-
-        # 4. Chama o modelo de IA
-        ai_response = vertex_service.generate_narrative(full_prompt)
-
-        # 5. Retorna a resposta ao jogador
-        return {"response": ai_response}
-
-    except Exception as e:
-        print(f"Ocorreu um erro: {e}")
-        raise HTTPException(status_code=500, detail="Ocorreu um erro interno. Por favor, tente novamente.")
+if __name__ == "__main__":
+    if not os.getenv("OPENAI_API_KEY"):
+        print("Erro: Chave não configurada.")
+    else:
+        run_local_chat()
