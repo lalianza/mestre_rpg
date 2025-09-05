@@ -11,3 +11,8 @@ env/
 
 
 .pytest_cache/
+
+
+data/documents/*
+data/processed_documents/*
+data/vector_store/*

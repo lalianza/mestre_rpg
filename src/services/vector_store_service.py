@@ -1,4 +1,5 @@
 import os
+import shutil  # Importe a biblioteca shutil para deletar diretórios
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -37,8 +38,12 @@ class LocalVectorStoreService:
 
     def create_and_persist_vector_store(self):
         """
-        Creates the vector store from the loaded documents and persists it locally.
+        Deletes the old vector store and creates a new one from the loaded documents.
         """
+        if os.path.exists(self.persist_directory):
+            print(f"Old vector store found. Deleting {self.persist_directory}...")
+            shutil.rmtree(self.persist_directory)
+
         print("Creating and persisting the vector store. This may take a few minutes...")
         documents = self.load_and_split_pdfs()
 
