@@ -1,0 +1,7 @@
+openai==1.103.0
+langchain==0.3.27
+langchain-community==0.3.29
+langchain-openai==0.3.29
+pypdf==6.0.0
+python-dotenv==1.1.1
+rank-bm25==0.2.2
